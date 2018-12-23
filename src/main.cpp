@@ -43,7 +43,8 @@ int main() {
   }
 
   // Create particle filter
-  ParticleFilter pf;
+  int n_particles = 100;
+  ParticleFilter pf(n_particles);
 
   h.onMessage([&pf,&map,&delta_t,&sensor_range,&sigma_pos,&sigma_landmark](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -55,7 +56,7 @@ int main() {
       if (s != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
-        
+
         if (event == "telemetry") {
           // j[1] is the data JSON object
           if (!pf.initialized()) {
@@ -172,7 +173,7 @@ int main() {
     std::cerr << "Failed to listen to port" << std::endl;
     return -1;
   }
-  
+
   h.run();
 }
 
