@@ -22,7 +22,6 @@ using namespace std;
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	std::cout << "Initializing particle filter. The particles number is " << num_particles << std::endl;
 
-	std::default_random_engine generator;
 	std::normal_distribution<double> dist_x(x, std[0]);
 	std::normal_distribution<double> dist_y(y, std[1]);
 	std::normal_distribution<double> dist_theta(theta, std[2]);
@@ -39,11 +38,25 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
-	// TODO: Add measurements to each particle and add random Gaussian noise.
-	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
-	//  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
-	//  http://www.cplusplus.com/reference/random/default_random_engine/
+	if (!is_initialized) {
+		std::cout << "The filter must be initialized first" << std::endl;
+		throw "Not initialized";
+	}
+	for(int i=0; i<num_particles; i++) {
+		Particle p = particles[i];
 
+		double theta = p.theta + yaw_rate * delta_t;
+		double x = p.x + (velocity / yaw_rate) * (sin(theta) - sin(p.theta));
+		double y = p.y + (velocity / yaw_rate) * (cos(p.theta) - cos(theta));
+
+		std::normal_distribution<double> dist_x(x, std_pos[0]);
+		std::normal_distribution<double> dist_y(y, std_pos[1]);
+		std::normal_distribution<double> dist_theta(theta, std_pos[2]);
+
+		p.x = dist_x(generator);
+		p.y = dist_y(generator);
+		p.theta = dist_theta(generator);
+	}
 }
 
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
