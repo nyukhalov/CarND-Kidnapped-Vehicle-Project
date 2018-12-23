@@ -62,20 +62,12 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		const std::vector<LandmarkObs> &observations, const Map &map) {
-	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
-	//   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-	// NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
-	//   according to the MAP'S coordinate system. You will need to transform between the two systems.
-	//   Keep in mind that this transformation requires both rotation AND translation (but no scaling).
-	//   The following is a good resource for the theory:
-	//   https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
-	//   and the following is a good resource for the actual equation to implement (look at equation
-	//   3.33
-	//   http://planning.cs.uiuc.edu/node99.html
-
 	for(int i=0; i<num_particles; i++) {
 		Particle p = particles[i];
 		std::vector<Map::single_landmark_s> predicted_landmarks = findLandmarksWithinSensorRange(p, map, sensor_range);
+		std::vector<Map::single_landmark_s> observed_landmarks = transformToMapCoordinates(p, observations);
+		setAssociations(p, predicted_landmarks);
+		//TODO: p.weight = calculateParticleWeight(predicted_landmarks, observed_landmarks, std_landmark);
 	}
 }
 
@@ -91,12 +83,38 @@ std::vector<Map::single_landmark_s> ParticleFilter::findLandmarksWithinSensorRan
 	return predicted_landmarks;
 }
 
-void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
-	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the
-	//   observed measurement to this particular landmark.
-	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to
-	//   implement this method and use it as a helper during the updateWeights phase.
+std::vector<Map::single_landmark_s> ParticleFilter::transformToMapCoordinates(const Particle& p, const std::vector<LandmarkObs>& observations) {
+	std::vector<Map::single_landmark_s> t_observations;
+	int size = observations.size();
+	for(int i=0; i<size; i++) {
+		LandmarkObs obs = observations[i];
+		double x = cos(p.theta)*obs.x - sin(p.theta)*obs.y + p.x;
+		double y = sin(p.theta)*obs.x + cos(p.theta)*obs.y + p.y;
+		Map::single_landmark_s landmark;
+		landmark.id_i = obs.id;
+		landmark.x_f = x;
+		landmark.y_f = y;
+		t_observations.push_back(landmark);
+	}
+	return t_observations;
+}
 
+void ParticleFilter::setAssociations(Particle& particle, const std::vector<Map::single_landmark_s> associations) {
+	std::vector<int> ids;
+	std::vector<double> xs;
+	std::vector<double> ys;
+
+	int size = associations.size();
+	for (int i=0; i<size; i++) {
+		Map::single_landmark_s landmark = associations[i];
+		ids.push_back(landmark.id_i);
+		xs.push_back(landmark.x_f);
+		ys.push_back(landmark.y_f);
+	}
+
+	particle.associations = ids;
+	particle.sense_x = xs;
+	particle.sense_y = ys;
 }
 
 void ParticleFilter::resample() {
@@ -104,19 +122,6 @@ void ParticleFilter::resample() {
 	// NOTE: You may find std::discrete_distribution helpful here.
 	//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
 
-}
-
-void ParticleFilter::SetAssociations(Particle& particle, const std::vector<int>& associations,
-                                     const std::vector<double>& sense_x, const std::vector<double>& sense_y)
-{
-    //particle: the particle to assign each listed association, and association's (x,y) world coordinates mapping to
-    // associations: The landmark id that goes along with each listed association
-    // sense_x: the associations x mapping already converted to world coordinates
-    // sense_y: the associations y mapping already converted to world coordinates
-
-    particle.associations= associations;
-    particle.sense_x = sense_x;
-    particle.sense_y = sense_y;
 }
 
 string ParticleFilter::getAssociations(Particle best)
