@@ -29,6 +29,7 @@ struct Particle {
 
 class ParticleFilter {
 
+private:
 	// Number of particles to draw
 	int num_particles;
 
@@ -40,6 +41,17 @@ class ParticleFilter {
 
 	// Random generator used for adding noise
 	std::default_random_engine generator;
+
+	std::vector<Map::single_landmark_s> findLandmarksWithinSensorRange(const Particle& p, const Map& map, double sensor_range);
+
+	/**
+	 * dataAssociation Finds which observations correspond to which landmarks (likely by using
+	 *   a nearest-neighbors data association).
+	 * @param predicted Vector of predicted landmark observations
+	 * @param observations Vector of landmark observations
+	 */
+	void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
+
 public:
 
 	// Set of current particles
@@ -75,14 +87,6 @@ public:
 	 * @param yaw_rate Yaw rate of car from t to t+1 [rad/s]
 	 */
 	void prediction(double delta_t, double std_pos[], double velocity, double yaw_rate);
-
-	/**
-	 * dataAssociation Finds which observations correspond to which landmarks (likely by using
-	 *   a nearest-neighbors data association).
-	 * @param predicted Vector of predicted landmark observations
-	 * @param observations Vector of landmark observations
-	 */
-	void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
 
 	/**
 	 * updateWeights Updates the weights for each particle based on the likelihood of the

@@ -15,6 +15,7 @@
 #include <string>
 #include <iterator>
 
+#include "helper_functions.h"
 #include "particle_filter.h"
 
 using namespace std;
@@ -59,16 +60,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 	}
 }
 
-void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
-	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the
-	//   observed measurement to this particular landmark.
-	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to
-	//   implement this method and use it as a helper during the updateWeights phase.
-
-}
-
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
-		const std::vector<LandmarkObs> &observations, const Map &map_landmarks) {
+		const std::vector<LandmarkObs> &observations, const Map &map) {
 	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
 	//   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
 	// NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
@@ -79,6 +72,31 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   and the following is a good resource for the actual equation to implement (look at equation
 	//   3.33
 	//   http://planning.cs.uiuc.edu/node99.html
+
+	for(int i=0; i<num_particles; i++) {
+		Particle p = particles[i];
+		std::vector<Map::single_landmark_s> predicted_landmarks = findLandmarksWithinSensorRange(p, map, sensor_range);
+	}
+}
+
+std::vector<Map::single_landmark_s> ParticleFilter::findLandmarksWithinSensorRange(const Particle& p, const Map& map, double sensor_range) {
+	std::vector<Map::single_landmark_s> predicted_landmarks;
+	int n_landmarks = map.landmark_list.size();
+	for(int i=0; i<n_landmarks; i++) {
+		Map::single_landmark_s landmark = map.landmark_list[i];
+		if (dist(p.x, p.y, landmark.x_f, landmark.y_f) <= sensor_range) {
+			predicted_landmarks.push_back(landmark);
+		}
+	}
+	return predicted_landmarks;
+}
+
+void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
+	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the
+	//   observed measurement to this particular landmark.
+	// NOTE: this method will NOT be called by the grading code. But you will probably find it useful to
+	//   implement this method and use it as a helper during the updateWeights phase.
+
 }
 
 void ParticleFilter::resample() {
