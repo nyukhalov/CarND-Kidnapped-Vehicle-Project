@@ -67,7 +67,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		std::vector<Map::single_landmark_s> predicted_landmarks = findLandmarksWithinSensorRange(p, map, sensor_range);
 		std::vector<Map::single_landmark_s> observed_landmarks = transformToMapCoordinates(p, observations);
 		setAssociations(p, predicted_landmarks);
-		//TODO: p.weight = calculateParticleWeight(predicted_landmarks, observed_landmarks, std_landmark);
+		p.weight = calculateParticleWeight(predicted_landmarks, observed_landmarks, std_landmark);
 	}
 }
 
@@ -99,7 +99,7 @@ std::vector<Map::single_landmark_s> ParticleFilter::transformToMapCoordinates(co
 	return t_observations;
 }
 
-void ParticleFilter::setAssociations(Particle& particle, const std::vector<Map::single_landmark_s> associations) {
+void ParticleFilter::setAssociations(Particle& particle, const std::vector<Map::single_landmark_s>& associations) {
 	std::vector<int> ids;
 	std::vector<double> xs;
 	std::vector<double> ys;
@@ -115,6 +115,24 @@ void ParticleFilter::setAssociations(Particle& particle, const std::vector<Map::
 	particle.associations = ids;
 	particle.sense_x = xs;
 	particle.sense_y = ys;
+}
+
+double ParticleFilter::calculateParticleWeight(const std::vector<Map::single_landmark_s>& predicted_landmarks,
+			const std::vector<Map::single_landmark_s>& observed_landmarks, double std_landmark[]) {
+	int size = observed_landmarks.size();
+	double weight = 1.0f;
+	for(int i=0; i<size; i++) {
+		Map::single_landmark_s observed_landmark = observed_landmarks[i];
+		Map::single_landmark_s closest_predicted_landmark = findClosestLandmark(observed_landmark, predicted_landmarks);
+		double prob = guassianDistr(observed_landmark, closest_predicted_landmark, std_landmark);
+		weight *= prob;
+	}
+	return weight;
+}
+
+Map::single_landmark_s ParticleFilter::findClosestLandmark(const Map::single_landmark_s& observed_landmark,
+			const std::vector<Map::single_landmark_s>& predicted_landmarks) {
+	return observed_landmark;
 }
 
 void ParticleFilter::resample() {
