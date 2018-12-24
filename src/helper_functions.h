@@ -58,7 +58,15 @@ inline double dist(double x1, double y1, double x2, double y2) {
 }
 
 inline double guassianDistr(const Map::single_landmark_s l1, Map::single_landmark_s l2, double std_landmark[]) {
-    return 0.0f;
+    double std_x = std_landmark[0];
+    double std_y = std_landmark[1];
+    double norm = 1.0f / (2 * M_PI * std_x * std_y);
+    double dx = l1.x_f - l2.x_f;
+    double dy = l1.y_f - l2.y_f;
+    double exponent_x = (dx*dx) / (2 * std_x*std_x);
+    double exponent_y = (dy*dy) / (2 * std_y*std_y);
+    double exponent = -(exponent_x + exponent_y);
+    return norm * exp(exponent);
 }
 
 inline double * getError(double gt_x, double gt_y, double gt_theta, double pf_x, double pf_y, double pf_theta) {
