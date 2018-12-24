@@ -132,7 +132,26 @@ double ParticleFilter::calculateParticleWeight(const std::vector<Map::single_lan
 
 Map::single_landmark_s ParticleFilter::findClosestLandmark(const Map::single_landmark_s& observed_landmark,
 			const std::vector<Map::single_landmark_s>& predicted_landmarks) {
-	return observed_landmark;
+	int size = predicted_landmarks.size();
+	if (size == 0) {
+		Map::single_landmark_s lm;
+		lm.id_i = -1;
+		lm.x_f = observed_landmark.x_f + 10000.0f;
+		lm.y_f = observed_landmark.y_f + 10000.0f;
+		return lm;
+	}
+
+	Map::single_landmark_s* lmp = NULL;
+	double min_dist = 999999;
+	for(int i=0; i<size; i++) {
+		Map::single_landmark_s predicted_lm = predicted_landmarks[i];
+		double d = dist(observed_landmark.x_f, observed_landmark.y_f, predicted_lm.x_f, predicted_lm.y_f);
+		if (d < min_dist) {
+			min_dist = d;
+			lmp = &predicted_lm;
+		}
+	}
+	return *lmp;
 }
 
 void ParticleFilter::resample() {
