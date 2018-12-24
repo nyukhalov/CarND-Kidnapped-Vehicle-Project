@@ -155,10 +155,20 @@ Map::single_landmark_s ParticleFilter::findClosestLandmark(const Map::single_lan
 }
 
 void ParticleFilter::resample() {
-	// TODO: Resample particles with replacement with probability proportional to their weight.
-	// NOTE: You may find std::discrete_distribution helpful here.
-	//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
+	std::vector<double> weights;
+	int size = particles.size();
+	for(int i=0; i<size; i++) {
+		weights.push_back(particles[i].weight);
+	}
 
+	std::discrete_distribution<> distr(weights.begin(), weights.end());
+	std::vector<Particle> resampled;
+	for(int i=0; i<size; i++) {
+		int idx = distr(generator);
+		resampled.push_back(particles[idx]);
+	}
+
+	particles = resampled;
 }
 
 string ParticleFilter::getAssociations(Particle best)
