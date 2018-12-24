@@ -44,7 +44,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 		throw "Not initialized";
 	}
 	for(int i=0; i<num_particles; i++) {
-		Particle p = particles[i];
+		Particle& p = particles[i];
 
 		double theta = p.theta + yaw_rate * delta_t;
 		double x = p.x + (velocity / yaw_rate) * (sin(theta) - sin(p.theta));
@@ -62,9 +62,15 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		const std::vector<LandmarkObs> &observations, const Map &map) {
+	//std::cout << "Car sensors observed " << observations.size() << " landmarks" << std::endl;
 	for(int i=0; i<num_particles; i++) {
-		Particle p = particles[i];
+		Particle& p = particles[i];
 		std::vector<Map::single_landmark_s> predicted_landmarks = findLandmarksWithinSensorRange(p, map, sensor_range);
+		//std::cout << "Found " <<  predicted_landmarks.size() << " predicted landmarks for particle " << i << std::endl;
+		for(int i=0; i<predicted_landmarks.size(); i++) {
+			auto obs = predicted_landmarks[i];
+			//std::cout << "Predicted: landmark " << obs.id_i << " = (" << obs.x_f << ", " << obs.y_f << ")" << std::endl;
+		}
 		std::vector<Map::single_landmark_s> observed_landmarks = transformToMapCoordinates(p, observations);
 		setAssociations(p, predicted_landmarks);
 		p.weight = calculateParticleWeight(predicted_landmarks, observed_landmarks, std_landmark);
@@ -91,7 +97,7 @@ std::vector<Map::single_landmark_s> ParticleFilter::transformToMapCoordinates(co
 		double x = cos(p.theta)*obs.x - sin(p.theta)*obs.y + p.x;
 		double y = sin(p.theta)*obs.x + cos(p.theta)*obs.y + p.y;
 		Map::single_landmark_s landmark;
-		landmark.id_i = obs.id;
+		landmark.id_i = -1;
 		landmark.x_f = x;
 		landmark.y_f = y;
 		t_observations.push_back(landmark);
@@ -123,8 +129,12 @@ double ParticleFilter::calculateParticleWeight(const std::vector<Map::single_lan
 	double weight = 1.0f;
 	for(int i=0; i<size; i++) {
 		Map::single_landmark_s observed_landmark = observed_landmarks[i];
-		Map::single_landmark_s closest_predicted_landmark = findClosestLandmark(observed_landmark, predicted_landmarks);
-		double prob = guassianDistr(observed_landmark, closest_predicted_landmark, std_landmark);
+		Map::single_landmark_s closest_predicted_lm = findClosestLandmark(observed_landmark, predicted_landmarks);
+		observed_landmark.id_i = closest_predicted_lm.id_i; // assosiate observed landmark to its closest landmark
+		//std::cout << "Observed landmark " << observed_landmark.id_i << " = (" << observed_landmark.x_f << ", " << observed_landmark.y_f << ")" << std::endl;
+		//std::cout << "Closest  landmark " << closest_predicted_lm.id_i << " = (" << closest_predicted_lm.x_f << ", " << closest_predicted_lm.y_f << ")" << std::endl;
+		double prob = guassianDistr(observed_landmark, closest_predicted_lm, std_landmark);
+		//std::cout << "Distribution: " << prob << std::endl;
 		weight *= prob;
 	}
 	return weight;
@@ -141,16 +151,18 @@ Map::single_landmark_s ParticleFilter::findClosestLandmark(const Map::single_lan
 		return lm;
 	}
 
-	Map::single_landmark_s* lmp = NULL;
+	const Map::single_landmark_s* lmp = NULL;
 	double min_dist = 999999;
 	for(int i=0; i<size; i++) {
-		Map::single_landmark_s predicted_lm = predicted_landmarks[i];
+		const Map::single_landmark_s& predicted_lm = predicted_landmarks[i];
 		double d = dist(observed_landmark.x_f, observed_landmark.y_f, predicted_lm.x_f, predicted_lm.y_f);
+		//std::cout << "Distance: " << d << std::endl;
 		if (d < min_dist) {
 			min_dist = d;
 			lmp = &predicted_lm;
 		}
 	}
+	//std::cout << "Min distance: " << min_dist << std::endl;
 	return *lmp;
 }
 
