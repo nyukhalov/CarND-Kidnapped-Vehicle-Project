@@ -57,13 +57,9 @@ inline double dist(double x1, double y1, double x2, double y2) {
 	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-inline double guassianDistr(const Map::single_landmark_s l1, Map::single_landmark_s l2, double std_landmark[]) {
+inline double guassianDistr(const Map::single_landmark_s& l1, Map::single_landmark_s& l2, double std_landmark[]) {
     double std_x = std_landmark[0];
     double std_y = std_landmark[1];
-    //std::cout << "std_x: " << std_x << std::endl;
-    //std::cout << "std_y: " << std_y << std::endl;
-    //std::cout << "l1: (" << l1.x_f << ", " << l1.y_f << std::endl;
-    //std::cout << "l2: (" << l2.x_f << ", " << l2.y_f << std::endl;
     double norm = 1.0f / (2 * M_PI * std_x * std_y);
     double dx = l1.x_f - l2.x_f;
     double dy = l1.y_f - l2.y_f;

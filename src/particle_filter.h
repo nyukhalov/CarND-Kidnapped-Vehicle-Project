@@ -53,7 +53,7 @@ private:
 	void setAssociations(Particle& particle, const std::vector<Map::single_landmark_s>& associations);
 
 	double calculateParticleWeight(const std::vector<Map::single_landmark_s>& predicted_landmarks,
-			const std::vector<Map::single_landmark_s>& observed_landmarks, double std_landmark[]);
+			std::vector<Map::single_landmark_s>& observed_landmarks, double std_landmark[]);
 
 	Map::single_landmark_s findClosestLandmark(const Map::single_landmark_s& observed_landmark,
 			const std::vector<Map::single_landmark_s>& predicted_landmarks);
