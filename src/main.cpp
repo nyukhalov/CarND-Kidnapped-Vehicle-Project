@@ -42,7 +42,7 @@ int main() {
     return -1;
   }
 
-  // Create particle filter
+  // Create particle filter with 500 particles
   int n_particles = 500;
   ParticleFilter pf(n_particles);
 

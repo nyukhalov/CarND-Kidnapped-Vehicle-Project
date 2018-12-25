@@ -42,19 +42,36 @@ private:
 	// Random generator used for adding noise
 	std::default_random_engine generator;
 
+	/*
+	 * Find landmarks around the given particle p within the given range sendor_range
+	 * @param p - a particle for which the method finds landmarks
+	 * @param map - a map containing a list of landmarks
+	 * @param sensor_range - range [m] of sensor
+	 */
 	std::vector<Map::single_landmark_s> findLandmarksWithinSensorRange(const Particle& p, const Map& map, double sensor_range);
 
+	/*
+	 * Transform the given observations' coordinates with respect to the given particle
+	 */
 	std::vector<Map::single_landmark_s> transformToMapCoordinates(const Particle& p, const std::vector<LandmarkObs>& observations);
 
 	/*
 	 * Set a particles list of associations, along with the associations calculated world x,y coordinates
-	 * This can be a very useful debugging tool to make sure transformations are correct and assocations correctly connected
 	 */
 	void setAssociations(Particle& particle, const std::vector<Map::single_landmark_s>& associations);
 
+	/*
+	 * Calculate particle`s weight
+	 * @param predicted_landmarks - landmarks seeing by a particle
+	 * @param observed_landmarks - landmarks observed by sensor
+	 * @param std_landmark[] array of dimension 2 [Landmark measurement uncertainty [x [m], y [m]]]
+	 */
 	double calculateParticleWeight(const std::vector<Map::single_landmark_s>& predicted_landmarks,
 			std::vector<Map::single_landmark_s>& observed_landmarks, double std_landmark[]);
 
+	/*
+	 * Find closest to the observed_landmark landmark in the given list of predicted landmarks
+	 */
 	Map::single_landmark_s findClosestLandmark(const Map::single_landmark_s& observed_landmark,
 			const std::vector<Map::single_landmark_s>& predicted_landmarks);
 public:
