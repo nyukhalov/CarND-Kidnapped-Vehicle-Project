@@ -43,7 +43,7 @@ int main() {
   }
 
   // Create particle filter
-  int n_particles = 100;
+  int n_particles = 500;
   ParticleFilter pf(n_particles);
 
   h.onMessage([&pf,&map,&delta_t,&sensor_range,&sigma_pos,&sigma_landmark](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
