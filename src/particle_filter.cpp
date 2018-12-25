@@ -53,7 +53,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[], double velocit
 			x = p.x + (velocity / yaw_rate) * (sin(theta) - sin(p.theta));
 			y = p.y + (velocity / yaw_rate) * (cos(p.theta) - cos(theta));
 		} else {
-			//TODO: handle the case
+			x = p.x + (velocity * delta_t * cos(p.theta));
+			y = p.y + (velocity * delta_t * sin(p.theta));
 		}
 
 		std::normal_distribution<double> dist_x(x, std_pos[0]);
