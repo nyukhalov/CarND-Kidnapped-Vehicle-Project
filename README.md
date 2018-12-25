@@ -2,7 +2,7 @@
 This repository contains the complete code of the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
 ## Project Introduction
-Your robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
+A robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
 
 In this project I have implemented a 2 dimensional particle filter in C++. My particle filter is given a map and some initial localization information (analogous to what a GPS would provide). At each time step the filter will also get observation and control data.
 
@@ -31,6 +31,7 @@ Here is the main protocol that main.cpp uses for uWebSocketIO in communicating w
 
 INPUT: values provided by the simulator to the c++ program
 
+```
 // sense noisy position data from the simulator
 
 ["sense_x"]
@@ -50,10 +51,11 @@ INPUT: values provided by the simulator to the c++ program
 ["sense_observations_x"]
 
 ["sense_observations_y"]
-
+```
 
 OUTPUT: values provided by the c++ program to the simulator
 
+```
 // best particle values used for calculating the error evaluation
 
 ["best_particle_x"]
@@ -73,7 +75,7 @@ OUTPUT: values provided by the c++ program to the simulator
 ["best_particle_sense_x"] <= list of sensed x positions
 
 ["best_particle_sense_y"] <= list of sensed y positions
-
+```
 
 The goal was to build out the methods in `particle_filter.cpp` until the simulator output says:
 
